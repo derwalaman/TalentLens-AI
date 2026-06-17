@@ -499,7 +499,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Create:
+Create .env:
 
 ```env
 GOOGLE_API_KEY=YOUR_API_KEY
@@ -527,7 +527,7 @@ cd talentlens-frontend
 npm install
 ```
 
-Create:
+Create .env.local:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
@@ -557,8 +557,8 @@ TalentLens AI is deployed on AWS EC2.
 
 ```txt
 Ubuntu 24.04
-t2.micro
-18 GB Storage
+t3.micro
+20 GB Storage
 ```
 
 ---
@@ -612,7 +612,7 @@ server {
 
     location /api/ {
 
-        proxy_pass http://127.0.0.1:8000/;
+        proxy_pass http://127.0.0.1:8000;
 
     }
 
