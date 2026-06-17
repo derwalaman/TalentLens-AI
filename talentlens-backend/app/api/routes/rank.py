@@ -1,5 +1,12 @@
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import (
+    APIRouter,
+    UploadFile,
+    File,
+    Form
+)
+
 from typing import List
+
 import tempfile
 import os
 
@@ -7,12 +14,8 @@ from app.services.parser_service import (
     extract_text_from_pdf
 )
 
-from app.services.embedding_service import (
-    generate_embedding
-)
-
-from app.services.faiss_service import (
-    semantic_similarity
+from app.services.analysis_service import (
+    analyze_resume_text
 )
 
 router = APIRouter()
@@ -25,10 +28,6 @@ async def rank_resumes(
 ):
 
     candidates = []
-
-    jd_embedding = generate_embedding(
-        job_description
-    )
 
     for file in files:
 
@@ -43,39 +42,144 @@ async def rank_resumes(
 
             temp_path = temp.name
 
-        resume_text = extract_text_from_pdf(
-            temp_path
-        )
+        try:
 
-        resume_embedding = generate_embedding(
-            resume_text
-        )
+            resume_text = (
+                extract_text_from_pdf(
+                    temp_path
+                )
+            )
 
-        similarity = semantic_similarity(
-            resume_embedding,
-            jd_embedding
-        )
+            analysis = (
+                analyze_resume_text(
+                    resume_text,
+                    job_description
+                )
+            )
 
-        score = round(
-            similarity * 100,
-            2
-        )
+            candidates.append(
+                {
+                    "name":
+                        file.filename,
 
-        candidates.append(
-            {
-                "name": file.filename,
-                "score": score
-            }
-        )
+                    "final_score":
+                        analysis[
+                            "final_score"
+                        ],
 
-        os.remove(temp_path)
+                    "semantic_score":
+                        analysis[
+                            "semantic_score"
+                        ],
+
+                    "skill_score":
+                        analysis[
+                            "skill_score"
+                        ],
+
+                    "matched_skills":
+                        analysis[
+                            "matched_skills"
+                        ],
+
+                    "missing_skills":
+                        analysis[
+                            "missing_skills"
+                        ],
+
+                    "strengths":
+                        analysis[
+                            "strengths"
+                        ],
+
+                    "weaknesses":
+                        analysis[
+                            "weaknesses"
+                        ],
+
+                    "recommendations":
+                        analysis[
+                            "recommendations"
+                        ],
+
+                    "education":
+                        analysis.get(
+                            "education",
+                            []
+                        ),
+
+                    "projects":
+                        analysis.get(
+                            "projects",
+                            []
+                        ),
+
+                    "experience":
+                        analysis.get(
+                            "experience",
+                            []
+                        ),
+
+                    "skills":
+                        analysis.get(
+                            "skills",
+                            []
+                        ),
+
+                    "job_title":
+                        analysis.get(
+                            "job_title",
+                            ""
+                        ),
+
+                    "technical_skills":
+                        analysis.get(
+                            "technical_skills",
+                            []
+                        ),
+
+                    "tools":
+                        analysis.get(
+                            "tools",
+                            []
+                        ),
+
+                    "soft_skills":
+                        analysis.get(
+                            "soft_skills",
+                            []
+                        ),
+
+                    "responsibilities":
+                        analysis.get(
+                            "responsibilities",
+                            []
+                        ),
+                    
+                    "candidate_summary":
+                        analysis.get(
+                            "candidate_summary",
+                            {}
+                        )       
+                }
+            )
+
+        finally:
+
+            if os.path.exists(
+                temp_path
+            ):
+                os.remove(
+                    temp_path
+                )
 
     candidates.sort(
-        key=lambda x: x["score"],
+        key=lambda x:
+            x["final_score"],
         reverse=True
     )
 
     return {
         "ranked_candidates":
-        candidates
+            candidates
     }

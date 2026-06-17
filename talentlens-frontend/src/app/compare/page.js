@@ -2,11 +2,29 @@
 
 import { useState } from "react";
 
-import { compareResumes }
-    from "@/services/compareApi";
+import Navbar from "@/components/common/Navbar";
+import Footer from "@/components/common/Footer";
+
+import ResumeCompareUploader
+    from "@/components/compare/ResumeCompareUploader";
+
+import JobDescriptionCompare
+    from "@/components/compare/JobDescriptionCompare";
+
+import CompareButton
+    from "@/components/compare/CompareButton";
 
 import ComparisonResult
     from "@/components/compare/ComparisonResult";
+
+import {
+    GitCompareArrows,
+    Sparkles,
+} from "lucide-react";
+
+import {
+    compareResumes,
+} from "@/services/compareApi";
 
 export default function ComparePage() {
 
@@ -36,9 +54,11 @@ export default function ComparePage() {
                 !fileB ||
                 !jobDescription
             ) {
-                alert(
-                    "Upload both resumes and enter JD"
+
+                toast.error(
+                    "Please upload both resumes and enter a job description."
                 );
+
                 return;
             }
 
@@ -55,11 +75,23 @@ export default function ComparePage() {
 
                 setResult(data);
 
+                setTimeout(() => {
+
+                    document
+                        .getElementById(
+                            "comparison-results"
+                        )
+                        ?.scrollIntoView({
+                            behavior: "smooth",
+                        });
+
+                }, 300);
+
             } catch (error) {
 
                 console.error(error);
 
-                alert(
+                toast.error(
                     "Comparison failed"
                 );
 
@@ -68,107 +100,261 @@ export default function ComparePage() {
                 setLoading(false);
 
             }
+
         };
 
     return (
-        <main className="min-h-screen bg-black text-white">
 
-            <div className="mx-auto max-w-7xl px-6 py-20">
+        <>
+            <Navbar />
 
-                <h1 className="mb-12 text-center text-6xl font-bold">
-                    Resume Comparison
-                </h1>
+            <main
+                className="
+                    relative
+                    min-h-screen
+                    overflow-hidden
+                    bg-black
+                    text-white
+                "
+            >
 
-                <div className="grid gap-8 lg:grid-cols-2">
+                {/* Background */}
 
-                    <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-
-                        <h2 className="mb-4 text-2xl font-bold">
-                            Resume A
-                        </h2>
-
-                        <input
-                            type="file"
-                            accept=".pdf"
-                            onChange={(e) =>
-                                setFileA(
-                                    e.target.files[0]
-                                )
-                            }
-                        />
-
-                    </div>
-
-                    <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-
-                        <h2 className="mb-4 text-2xl font-bold">
-                            Resume B
-                        </h2>
-
-                        <input
-                            type="file"
-                            accept=".pdf"
-                            onChange={(e) =>
-                                setFileB(
-                                    e.target.files[0]
-                                )
-                            }
-                        />
-
-                    </div>
-
-                </div>
-
-                <div className="mt-8">
-
-                    <textarea
-                        rows={12}
-                        value={jobDescription}
-                        onChange={(e) =>
-                            setJobDescription(
-                                e.target.value
-                            )
-                        }
-                        placeholder="Paste Job Description..."
-                        className="
-                        w-full
-                        rounded-3xl
-                        border border-white/10
-                        bg-white/5
-                        p-6
-                        "
-                    />
-
-                </div>
-
-                <div className="mt-8 text-center">
-
-                    <button
-                        onClick={
-                            handleCompare
-                        }
-                        className="
-                        rounded-xl
-                        bg-violet-600
-                        px-8
-                        py-4
-                        text-lg
-                        font-bold
-                        "
-                    >
-                        {loading
-                            ? "Comparing..."
-                            : "Compare Candidates"}
-                    </button>
-
-                </div>
-
-                <ComparisonResult
-                    result={result}
+                <div
+                    className="
+                        absolute
+                        inset-0
+                        bg-[radial-gradient(circle_at_top_left,#7c3aed22,transparent_35%),radial-gradient(circle_at_bottom_right,#06b6d422,transparent_35%)]
+                    "
                 />
 
-            </div>
+                <div
+                    className="
+                        relative
+                        mx-auto
+                        max-w-[1400px]
+                        px-6
+                        py-24
+                    "
+                >
 
-        </main>
+                    {/* Hero */}
+
+                    <section
+                        className="
+                            text-center
+                        "
+                    >
+
+                        <div
+                            className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-full
+                                border
+                                border-violet-500/20
+                                bg-violet-500/10
+                                px-5
+                                py-2
+                                text-sm
+                                text-violet-300
+                            "
+                        >
+
+                            <Sparkles
+                                className="
+                                    h-4
+                                    w-4
+                                "
+                            />
+
+                            AI Candidate Benchmarking
+
+                        </div>
+
+                        <h1
+                            className="
+                                mt-8
+                                text-5xl
+                                font-black
+                                md:text-7xl
+                            "
+                        >
+                            Resume Comparison
+                        </h1>
+
+                        <p
+                            className="
+                                mx-auto
+                                mt-6
+                                max-w-3xl
+                                text-lg
+                                leading-8
+                                text-gray-400
+                            "
+                        >
+                            Upload two resumes and compare
+                            candidates side-by-side using
+                            semantic matching, ATS scoring,
+                            skill-gap analysis and recruiter
+                            intelligence.
+                        </p>
+
+                    </section>
+
+                    {/* Upload Section */}
+
+                    <section
+                        className="
+                            mt-20
+                        "
+                    >
+
+                        <div
+                            className="
+                                mb-8
+                                flex
+                                items-center
+                                gap-3
+                            "
+                        >
+
+                            <GitCompareArrows
+                                className="
+                                    h-7
+                                    w-7
+                                    text-violet-400
+                                "
+                            />
+
+                            <h2
+                                className="
+                                    text-3xl
+                                    font-black
+                                "
+                            >
+                                Candidate Inputs
+                            </h2>
+
+                        </div>
+
+                        <div
+                            className="
+                                grid
+                                gap-8
+                                xl:grid-cols-2
+                            "
+                        >
+
+                            <div>
+
+                                <div
+                                    className="
+                                        mb-4
+                                        text-lg
+                                        font-semibold
+                                        text-emerald-400
+                                    "
+                                >
+                                    Candidate A
+                                </div>
+
+                                <ResumeCompareUploader
+                                    file={fileA}
+                                    setFile={setFileA}
+                                />
+
+                            </div>
+
+                            <div>
+
+                                <div
+                                    className="
+                                        mb-4
+                                        text-lg
+                                        font-semibold
+                                        text-cyan-400
+                                    "
+                                >
+                                    Candidate B
+                                </div>
+
+                                <ResumeCompareUploader
+                                    file={fileB}
+                                    setFile={setFileB}
+                                />
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    {/* JD */}
+
+                    <section
+                        className="
+                            mt-10
+                        "
+                    >
+
+                        <JobDescriptionCompare
+                            jobDescription={
+                                jobDescription
+                            }
+                            setJobDescription={
+                                setJobDescription
+                            }
+                        />
+
+                    </section>
+
+                    {/* Compare Button */}
+
+                    <div
+                        className="
+                            mt-12
+                            flex
+                            justify-center
+                        "
+                    >
+
+                        <CompareButton
+                            loading={loading}
+                            onClick={
+                                handleCompare
+                            }
+                        />
+
+                    </div>
+
+                    {/* Results */}
+
+                    {
+                        result && (
+
+                            <div
+                                id="comparison-results"
+                                className="mt-20"
+                            >
+
+                                <ComparisonResult
+                                    result={result}
+                                />
+
+                            </div>
+
+                        )
+                    }
+
+                </div>
+
+            </main>
+
+            <Footer />
+        </>
+
     );
+
 }
